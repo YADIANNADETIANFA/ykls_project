@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.kai.webby.dao.QuestionDAO">
+
+    <!-- 在当前Mapper.xml中使用二级缓存 -->
+    <cache type="com.kai.webby.cache.RedisCache"
+           flushInterval="60000"
+           size="1024"
+           readOnly="false"/>
+
+    <!-- sql标签的内容，通过include来引用 -->
+    <sql id="table">question</sql>
+    <sql id="insertFields">title, description, user_id, created_date, comment_count, status, content</sql>
+    <sql id="selectFields">id, title, description, user_id, created_date, comment_count, status, content</sql>
+
+    <!-- 新增后，回写自增id，线程安全 -->
+    <insert id="addQuestion" parameterType="com.kai.webby.model.Question" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (   <include refid="insertFields"/>    )
+        VALUES
+        (#{title}, #{description}, #{userId}, #{createdDate}, #{commentCount}, #{status}, #{content})
+    </insert>
+
+    <update id="deleteQuestion" parameterType="int">
+        UPDATE
+        <include refid="table"/>
+        SET
+        status = 1
+        WHERE
+        id = #{id}
+    </update>
+
+    <select id="selectLastestQuestions" parameterType="map" resultType="com.kai.webby.model.Question">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="table"/>
+        WHERE status = 0
+        <if test="userId != 0">
+            AND user_id = #{userId}
+        </if>
+        ORDER BY id DESC
+        LIMIT #{limitFirst},#{limitSec}
+    </select>
+
+    <select id="getById" parameterType="int" resultType="com.kai.webby.model.Question">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="table"/>
+        WHERE
+        id = #{id}
+    </select>
+
+    <update id="updateCommentCount" parameterType="map">
+        UPDATE
+        <include refid="table"/>
+        SET
+        comment_count = #{commentCount}
+        WHERE
+        id = #{id}
+    </update>
+
+    <select id="getQuestionsCount" resultType="int">
+        SELECT
+        COUNT(id)
+        FROM
+        <include refid="table"/>
+        WHERE
+        status = 0
+    </select>
+
+    <select id="getQuestionsCountByUserId" parameterType="int" resultType="int">
+        SELECT
+        COUNT(id)
+        FROM
+        <include refid="table"/>
+        WHERE
+        status = 0 AND user_id = #{userId}
+    </select>
+
+</mapper>
+
+<!--com.example.demo.dao可能不是包的结构，很可能"com.example.demo.dao"就只是一个文件夹名！！要注意检查-->
+<!--说的是src.main.java,不是resources这个文件-->
+
+<!-- <mapper namespace="com.kai.webby.dao.QuestionDAO"> -->
+<!-- <select id="selectLastestQuestions" resultType="com.kai.webby.model.Question"> -->
+<!-- 这两个位置都要匹配得上 -->
+
+<!-- 另外就是要指定好mybatis-config.xml -->
+
+<!-- 另外就是要指定好application.yml文件 -->
+<!--
+mybatis:
+  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:com.kai.webby.dao/*.xml
+  用的是.  不是/ 的文件分隔
+-->

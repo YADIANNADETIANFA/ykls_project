@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kai.webby.dao.MessageDAO">
+
+    <!-- 在当前Mapper.xml中使用二级缓存 -->
+    <cache type="com.kai.webby.cache.RedisCache"
+           flushInterval="60000"
+           size="1024"
+           readOnly="false"/>
+
+    <!-- sql标签的内容，通过include来引用 -->
+    <sql id="message">message</sql>
+    <sql id="insertFields">from_id, to_id, content, has_read, conversation_id, created_date</sql>
+    <sql id="selectFields">id, from_id, to_id, content, has_read, conversation_id, created_date</sql>
+
+    <insert id="addMessage" parameterType="com.kai.webby.model.Message">
+        INSERT INTO
+        <include refid="message"/>
+        ( <include refid="insertFields"/> )
+        VALUES
+        ( #{fromId}, #{toId}, #{content}, #{hasRead}, #{conversationId}, #{createdDate} )
+    </insert>
+
+    <select id="getConversationDetail" parameterType="map" resultType="com.kai.webby.model.Message">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="message"/>
+        WHERE
+        conversation_id = #{conversationId} ORDER BY created_date DESC LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="getConversationList" parameterType="map" resultType="com.kai.webby.model.Message">
+        SELECT
+        from_id, to_id, content, has_read, conversation_id, created_date, COUNT(id) AS id
+        FROM
+            ( SELECT * FROM <include refid="message"/> WHERE from_id = #{userId} or to_id = #{userId} ORDER BY created_date DESC ) tt
+        GROUP BY
+        conversation_id
+        ORDER BY
+        created_date
+        DESC
+        LIMIT #{limitFirst}, #{limitSec}
+    </select>
+
+    <select id="getConversationUnreadCount" parameterType="map" resultType="int">
+        SELECT
+        COUNT(id)
+        FROM
+        <include refid="message"/>
+        WHERE
+        has_read = 0 AND to_id = #{userId} AND conversation_id = #{conversationId}
+    </select>
+
+    <select id="getConversationListCount" parameterType="int" resultType="int">
+        SELECT
+        COUNT( DISTINCT conversation_id)
+        FROM
+        <include refid="message"/>
+        WHERE
+        from_id = #{localUserId} OR to_id = #{localUserId}
+    </select>
+
+    <select id="getConversationDetailCount" parameterType="String" resultType="int">
+        SELECT
+        COUNT(id)
+        FROM
+        <include refid="message"/>
+        WHERE
+        conversation_id = #{conversationId}
+    </select>
+
+
+
+
+
+</mapper>
+
+
+

@@ -1,0 +1,105 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+#    linux and windows
+    url: jdbc:mysql://192.168.1.10:3306/test1?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+
+#    aliyun
+#    url: jdbc:mysql://172.*.*.155:3306/test1?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+
+    username: root
+    password: ykls
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      # 初始连接数
+      initial-size: 10
+      # 最大连接数
+      max-active: 30
+      # 最小闲置数
+      min-idle: 10
+      # 获取连接的最大等待时间，单位ms
+      max-wait: 5000
+
+  redis:
+#    单节点配置
+#    host: 127.0.0.1
+#    port: 6379
+
+#    集群配置
+    cluster:
+
+#      linux and windows
+      nodes:
+        - 192.168.1.10:6381
+        - 192.168.1.10:6382
+        - 192.168.1.10:6383
+        - 192.168.1.10:6384
+        - 192.168.1.10:6385
+        - 192.168.1.10:6386
+
+#      aliyun
+#      nodes:
+#        - 172.*.*.155:6381
+#        - 172.*.*.155:6382
+#        - 172.*.*.155:6383
+#        - 172.*.*.155:6384
+#        - 172.*.*.155:6385
+#        - 172.*.*.155:6386
+
+#     获取失败时，最大重定向次数
+      max-redirects: 2
+
+    database: 10
+    timeout: 30000
+    lettuce:
+      # 配置后，将自动使用redis连接池
+      pool:
+        # 连接池最大空闲连接数，默认8
+        max-idle: 8
+        # 连接池最小空闲连接数，默认0
+        min-idle: 0
+        # 连接池最大连接数，默认8，负数表示无限制
+        max-active: 8
+        # 连接池最大阻塞等等时间（负数表示无限制），默认-1
+        max-wait: -1
+
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+  rabbitmq:
+
+#    aliyun
+#    host: 172.*.*.155
+
+#    linux and windows
+    host: 192.168.1.10
+
+
+    port: 5672
+    username: ykls
+    password: ykls
+    virtual-host: /ykls
+
+#  velocity:
+#    suffix: .html
+#    toolbox-config-location: toolbox.xml
+
+mybatis:
+  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:com.kai.webby.dao/*.xml
+
+server:
+  port: 8082
+
+# linux and windows
+picture:
+  show: /img/**
+  up-path: /home/ykls22/myWebbyJava/webbyImages/
+
+#picture:
+#  show: /img/**
+#  up-path: D:/myProject/Webby/MyWebby_java_windows/webbyImages/

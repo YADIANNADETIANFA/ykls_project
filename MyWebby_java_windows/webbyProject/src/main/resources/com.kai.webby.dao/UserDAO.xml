@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kai.webby.dao.UserDAO">
+
+    <!-- 在当前Mapper.xml中使用二级缓存 -->
+    <cache type="com.kai.webby.cache.RedisCache"
+           flushInterval="60000"
+           size="1024"
+           readOnly="false"/>
+
+    <!-- 如果联表查询，可共享缓存，将多个namespace的缓存放到同一个redisKey下 -->
+    <!-- 假设CommentDAO与userDAO存在联表查询，那二者的缓存可以都放在CommentDAO下或userDAO下
+            假设都放在CommentDAO下，那么CommentDAO.xml配置<cache/>标签，不用配置<cache-ref/>标签；而UserDAO.xml配置<cache-ref>标签，不配置<cache/>标签，即可实现.
+            若UserDAO.xml同时配置了<cache/>与<cache-ref/>，则优先以<cache/>为准，即仍使用自己的UserDAO作为redisKey-->
+    <!--<cache-ref namespace="com.kai.webby.dao.CommentDAO"/>-->
+
+    <!-- sql标签的内容，通过include来引用 -->
+    <sql id="table">user</sql>
+    <sql id="insertFields">name, password, salt, head_url, qq, role, permission, birth, sex, type, signed</sql>
+    <sql id="selectFields">id, name, password, salt, head_url, qq, role, permission, birth, sex, type, signed</sql>
+
+    <insert id="addUser" parameterType="com.kai.webby.model.User">
+        INSERT INTO
+        <include refid="table"/>
+        ( <include refid="insertFields"/> )
+        VALUES
+        ( #{name}, #{password}, #{salt}, #{headUrl}, #{qq}, #{role}, #{permission}, #{birth}, #{sex}, #{type}, #{signed} )
+    </insert>
+
+    <select id="selectById" parameterType="int" resultType="com.kai.webby.model.User">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="table"/>
+        WHERE
+        id = #{id}
+    </select>
+
+    <select id="selectByName" parameterType="String" resultType="com.kai.webby.model.User">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="table"/>
+        WHERE
+        name = #{name}
+    </select>
+
+</mapper>
+
+
+

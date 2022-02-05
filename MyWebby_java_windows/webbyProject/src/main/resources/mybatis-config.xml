@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <!-- 显式的开启全局缓存，即二级缓存，虽默认也是true，但一般都显式展示 -->
+        <setting name="cacheEnabled" value="true"/>
+        <!-- 默认查询超时时间，单位：秒 -->
+        <setting name="defaultStatementTimeout" value="10"/>
+        <!-- 将java对象与数据库字段做映射，驼峰映射，A_COLUMN映射aColumn -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- 日志配置 -->
+        <!--<setting name="logImpl" value="STDOUT_LOGGING"/>-->
+        <setting name="logImpl" value="LOG4J"/>
+    </settings>
+
+
+</configuration>

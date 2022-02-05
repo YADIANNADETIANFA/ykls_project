@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kai.webby.dao.CommentDAO">
+
+    <!-- 在当前Mapper.xml中使用二级缓存 -->
+    <cache type="com.kai.webby.cache.RedisCache"
+           flushInterval="60000"
+           size="1024"
+           readOnly="false"/>
+
+    <!-- sql标签的内容，通过include来引用 -->
+    <sql id="table">comment</sql>
+    <sql id="insertFields">user_id, content, created_date, entity_id, entity_type, status</sql>
+    <sql id="selectFields">id, user_id, content, created_date, entity_id, entity_type, status</sql>
+
+    <!-- 新增后，回写自增id，线程安全 -->
+    <insert id="addComment" parameterType="com.kai.webby.model.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        ( <include refid="insertFields"/> )
+        VALUES
+        ( #{userId},#{content},#{createdDate},#{entityId},#{entityType},#{status} )
+    </insert>
+
+    <select id="getCommentById" parameterType="int" resultType="com.kai.webby.model.Comment">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="table"/>
+        WHERE
+        id = #{id}
+    </select>
+
+    <select id="selectCommentByEntity" parameterType="map" resultType="com.kai.webby.model.Comment">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="table"/>
+        WHERE
+        status = 0 AND
+        entity_id = #{entityId} AND entity_type = #{entityType} ORDER BY created_date DESC LIMIT #{limitFirst}, #{limitSec}
+    </select>
+
+    <select id="getCommentCount" parameterType="map" resultType="int">
+        SELECT
+        COUNT(id)
+        FROM
+        <include refid="table"/>
+        WHERE
+        status = 0 AND
+        entity_id = #{entityId} AND entity_type = #{entityType}
+    </select>
+
+    <select id="getUserCommentCount" parameterType="int" resultType="int">
+        SELECT
+        COUNT(id)
+        FROM
+        <include refid="table"/>
+        WHERE
+        status = 0 AND
+        user_id = #{userId}
+    </select>
+
+</mapper>
+
+
+
