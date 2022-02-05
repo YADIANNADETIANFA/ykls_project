@@ -28,6 +28,36 @@
 
 
 
++ 项目效果展示
+
+  ![登录页面](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E7%99%BB%E5%BD%95%E9%A1%B5%E9%9D%A2.png)
+
+  ![注册页面1](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E6%B3%A8%E5%86%8C%E9%A1%B5%E9%9D%A2.png)
+
+  ![注册页面2](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E6%B3%A8%E5%86%8C%E9%A1%B5%E9%9D%A22.png)
+
+  ![主站](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E4%B8%BB%E7%AB%99.png)
+
+  ![个人主页](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E4%B8%AA%E4%BA%BA%E4%B8%BB%E9%A1%B5.png)
+
+  ![动态](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E5%8A%A8%E6%80%811.png)
+
+  ![发帖](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E5%8F%91%E5%B8%96.png)
+
+  ![发送私信](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E5%8F%91%E9%80%81%E7%A7%81%E4%BF%A1.png)
+
+  ![帖子详情](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E5%B8%96%E5%AD%90%E8%AF%A6%E6%83%85.png)
+
+  ![用户搜索](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E6%90%9C%E7%B4%A22.png)
+
+  ![内容搜索](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD.png)
+
+  ![私信列表](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E7%A7%81%E4%BF%A1%E5%88%97%E8%A1%A8.png)
+
+  ![评论与点赞点踩](https://icarustypora.oss-cn-shenzhen.aliyuncs.com/project_ykls/%E8%AF%84%E8%AE%BA%E4%B8%8E%E7%82%B9%E8%B5%9E%E7%82%B9%E8%B8%A9.png)
+
+  
+
 #### 项目搭建时的一些随手笔记
 
 + Lombok
@@ -1363,13 +1393,90 @@
 
   systemctl stop rabbitmq-server
 
+
+
+
+
++ Mysql数据库表
+
+  ```mysql
+  CREATE TABLE `comment` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT '自增id',
+    `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '评论内容',
+    `user_id` int NOT NULL COMMENT '评论人，所属用户',
+    `entity_id` int NOT NULL COMMENT '所评论问题的自增id',
+    `entity_type` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '对问题进行评论，固定QUESTION',
+    `created_date` datetime NOT NULL COMMENT '最近更新时间',
+    `status` int NOT NULL DEFAULT '0' COMMENT '状态',
+    PRIMARY KEY (`id`),
+    KEY `entity_index` (`entity_id`,`entity_type`) USING BTREE
+  ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3
+  
+  
+  CREATE TABLE `feed` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `created_date` datetime DEFAULT NULL,
+    `user_id` int DEFAULT NULL,
+    `data` tinytext CHARACTER SET utf8 COLLATE utf8_general_ci,
+    `type` int DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `user_index` (`user_id`) USING BTREE
+  ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3
+  
+  
+  CREATE TABLE `message` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `from_id` int DEFAULT NULL,
+    `to_id` int DEFAULT NULL,
+    `content` text CHARACTER SET utf8 COLLATE utf8_general_ci,
+    `created_date` datetime DEFAULT NULL,
+    `has_read` int DEFAULT NULL,
+    `conversation_id` varchar(45) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `conversation_index` (`conversation_id`) USING BTREE,
+    KEY `created_date` (`created_date`) USING BTREE
+  ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb3
+  
+  
+  CREATE TABLE `question` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT '自增id',
+    `title` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '标题',
+    `description` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '摘要',
+    `user_id` int NOT NULL COMMENT '提出人，所属用户',
+    `created_date` datetime NOT NULL COMMENT '最新修改时间',
+    `comment_count` int NOT NULL COMMENT '评论数',
+    `status` int NOT NULL COMMENT '0-正常，1-已删除',
+    `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'md内容',
+    PRIMARY KEY (`id`),
+    KEY `date_index` (`created_date`) USING BTREE
+  ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3
+  
+  
+  CREATE TABLE `user` (
+    `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
+    `name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '昵称',
+    `password` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '密码',
+    `salt` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '盐',
+    `head_url` varchar(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '用户头像',
+    `qq` varchar(16) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '个人qq，用于发送登陆通知等',
+    `role` varchar(45) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT 'admin-管理员\nvip-会员\nnormal-普通用户\nlimited-受限用户',
+    `permission` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '权限',
+    `birth` varchar(45) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '用户生日',
+    `sex` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '性别，F-男，M-女',
+    `type` varchar(256) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '可能喜欢',
+    `signed` varchar(256) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '个性签名',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `name` (`name`)
+  ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3
+  ```
+
 ***
 
 #### 附加说明
 
 1. 项目可部署在本地虚拟机环境或阿里云服务器环境。我在两个环境都部署过，但个人买的的阿里云服务器性能较低，没办法支持ES等集群环境的部署，最终上线的服务卡顿较为严重。因此若想部署到线上的云服务器，需考虑服务器的性能。
 2. 由于个人技术水平有限，另外现在自己的空闲时间也越来越少，项目中有些地方存在不足，有些地方也可能存在一些bug，还望大家见谅！本项目代码完全开源，大家可任意使用。后续若有大佬愿意调试、迭代出更加完善的版本，在下感激不尽！届时希望大佬们能告诉我一下，让我也有更多学习的机会。
-3. 项目的前端使用Vue搭建，很惭愧我的前端基础比较渣，前端部分的代码望大家见谅。UI界面很多都是使用饿了么的element-ui.
+3. 项目的前端使用Vue搭建，很惭愧我的前端基础比较渣，前端部分的代码望大家见谅。UI界面很多都是使用饿了么的element-ui。我的显示器是31.5寸，分辨率2560*1440，在这个分辨率下前端效果可正常展示，若想适配其他分辨率，还需各位手动调节css样式代码。
 4. 项目中涉及到的一些技术都可以在网上或B站获取学习。这里要感谢codeSheep大佬、编程不良人大佬、狂神大佬等Up主。在此表示真挚谢意！！
 5. 欢迎大家访问我的博客http://www.icarus.wiki/，上面有些杂七杂八的技术整理与分享。欢迎大家指出错误或不足！另外大家若发现有哪些内容我没有标明出处，欢迎大家补充！
 6. 我的github：https://github.com/YADIANNADETIANFA
